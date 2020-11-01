@@ -1,11 +1,11 @@
 const Product = require("../model/Product");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-exports.createProduct = async(req, res) => {
+exports.createProduct = async (req, res) => {
   try {
     /**loophole - two code can be same  */
-    const rendom_character = Math.random().toString(36).substr(2, 4 );
-    const productCode = rendom_character.toUpperCase();
+    const random_character = Math.random().toString(36).substr(2, 4);
+    const productCode = random_character.toUpperCase();
 
     /** Create product object */
     let insertedProduct = await new Product({
@@ -13,53 +13,130 @@ exports.createProduct = async(req, res) => {
       title: req.body.title,
       originalPrice: req.body.originalPrice,
       discount: req.body.discount,
+      sellingPrice:
+        req.body.originalPrice -
+        (req.body.originalPrice * req.body.discount) / 100,
       color: req.body.color,
       returnDayCount: req.body.returnDate,
-      payment: {
-        online: true,
-        offline: false,
-      },
+      payment: req.body.payment,
+      category: req.body.category,
       sellerBy: req.body.sellerBy,
+      images: req.body.images,
       live: true,
       detailDescription: req.body.detailDescription,
       productUniqeCode: productCode,
       stock: req.body.stock,
-      quantity: req.body.stock
-      
-    }).save()
+      quantity: req.body.stock,
+    }).save();
 
-      res.status(201).json({success:true, message:"Product Saved", data:insertedProduct});
+    res
+      .status(201)
+      .json({ success: true, message: "Product Saved", data: insertedProduct });
   } catch (error) {
-    return res.status(400).json({ success: false });
+    res.status(400).json({ success: false });
   }
 };
 
 exports.updateProduct = async (req, res) => {
-
   try {
-    let updatedData = await Product.findOneAndUpdate({_id:mongoose.Types.ObjectId(req.params.id)},{$set:req.body},{new:true})
-    // const productall = await Product.find()
-    // console.log(productall)
-    // const product = await Product.findByIdAndUpdate(req.body, req.params.id, {
-    //   new: true,
-    //   runValidators: true,
-    // });
-
-    // if (!product) {
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, message: " Product not found" });
-    // }
-    res.json({
+    let updatedData = await Product.findOneAndUpdate(
+      { _id: mongoose.Types.ObjectId(req.params.id) },
+      { $set: req.body },
+      { new: true }
+    );
+    res.status(200).json({
       success: true,
-      message:"Product Updated",
+      message: "Product Updated",
       data: updatedData,
     });
   } catch (error) {
-    console.log(error)
-    return res
-      .status(400)
-      .json({ success: false, message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.deleteProduct = async (req, res) => {
+  try {
+    await Product.findOneAndDelete({
+      _id: mongoose.Types.ObjectId(req.params.id),
+    });
+    res.status(200).json({
+      success: true,
+      message: "Product Deleted",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.searchWithCategory = async (req, res) => {
+  try {
+    let searchText = req.params.searchText;
+    let searchedProducts = await Product.find({
+      $or: [
+        { "category.mainCategory": new RegExp(searchText, "i") },
+        { "category.subCategory": new RegExp(searchText, "i") },
+      ],
+    }).limit(50);
+    res.status(200).json({
+      success: true,
+      data: searchedProducts,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.searchProduct = async (req, res) => {
+  try {
+    let searchText = req.params.searchText;
+    let searchedProducts = await Product.aggregate([
+      {
+        $match: {
+          $text: {
+            $search: searchText,
+          },
+        },
+      },
+      { $limit: 50 },
+    ]);
+    res.status(200).json({
+      success: true,
+      data: searchedProducts,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.getAllProducts = async (req, res) => {
+  try {
+    let page = parseInt(req.params.page);
+    let limit = parseInt(req.params.limit);
+    let products = await Product.find({})
+      .sort({ created_at: -1 })
+      .skip(page * limit)
+      .limit(limit);
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.getSingleProductWithId = async (req, res) => {
+  try {
+    let productId = req.params.productId;
+    let product = await Product.findOne({
+      _id: mongoose.Types.ObjectId(productId),
+    });
+    res.status(200).json({
+      success: true,
+      data: product,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -82,7 +159,7 @@ exports.imageUpload = (req, res) => {
         .json({ success: true, data: result, message: "Image uploaded!" });
     });
   } catch (error) {
-    return res
+    res
       .status(400)
       .json({ success: false, message: "Image can not uploaded !" });
   }
