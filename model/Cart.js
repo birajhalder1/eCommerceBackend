@@ -4,7 +4,7 @@ const CartSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: "User",
   },
-  product: [
+  products: [
     {
       product: { type: mongoose.Types.ObjectId, ref: "Product" },
       quantity: Number,
@@ -13,7 +13,7 @@ const CartSchema = new mongoose.Schema({
       updated_at:{type:Date, default:Date.now}
     },
   ],
-  totalPrize: Number,
+  totalPrice: Number,
   noOfItem: Number,
   delivaryCharges: Number,
   subTotal: Number,
