@@ -4,6 +4,7 @@ const {
   getSingleCartWithId,
   updateCart,
   deleteCart,
+  singleProductDeleteWithCart,
   getAllByAdmin,
 } = require("../controller/cart");
 const {
@@ -40,6 +41,13 @@ route.patch("/updateCart/:id", checkAuthCustomer, updateCart);
  * access   Private
  */
 route.delete("/deleteCart/:id", checkAuthCustomer, deleteCart);
+
+/**
+ * route    DELETE /api/v1/cart/remove-product-with-cart/:productId
+ * desc     Remove product with cart by customer
+ * access   Private
+ */
+route.delete("/remove-product-with-cart/:productId", checkAuthCustomer, singleProductDeleteWithCart);
 
 /**
  * route    GET /api/v1/cart/allCartInfo
