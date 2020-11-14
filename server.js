@@ -15,6 +15,8 @@ connectionDB();
 const user = require("./routes/user");
 const product = require("./routes/product");
 const cart = require("./routes/cart");
+const wishlist = require("./routes/wishlist");
+const billingDetails = require("./routes/billingDetails");
 
 // Load express framework
 const app = express();
@@ -35,6 +37,8 @@ app.use(bodyParser.json());
 app.use("/api/v1/user", user);
 app.use("/api/v1/product", product);
 app.use("/api/v1/cart", cart);
+app.use("/api/v1/wishlist", wishlist);
+app.use("/api/v1/billingDetails", billingDetails);
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(

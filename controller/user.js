@@ -26,9 +26,8 @@ exports.createUserRegistration = (req, res) => {
           email: req.body.email,
           password: req.body.password,
           phone: req.body.phone,
-          pin: req.body.pin,
           otp,
-          thumbnail: req.body.thumbnail,
+          profileImage: req.body.thumbnail,
           role: {
             customar: true,
             admin: false,
@@ -90,7 +89,6 @@ exports.createUserRegistration = (req, res) => {
  */
 exports.createUserLogin = (req, res) => {
   try {
-    console.log(req.body);
     const email = req.body.email;
     const password = req.body.password;
 
@@ -106,7 +104,6 @@ exports.createUserLogin = (req, res) => {
           // User match
 
           const payload = { id: user._id, name: user.name, email: user.email }; //create JWT payload
-          console.log(payload);
 
           // Create JWTToken
           jwt.sign(
@@ -121,8 +118,11 @@ exports.createUserLogin = (req, res) => {
             }
           );
           // await generateBearerToken(user);
-        }else{
-          res.status(400).json({success: false, message: "Wrong password please type correct password"})
+        } else {
+          res.status(400).json({
+            success: false,
+            message: "Wrong password please type correct password",
+          });
         }
       });
     });
@@ -297,7 +297,7 @@ exports.OTPMatch = async (req, res) => {
  */
 exports.updatePassword = async (req, res) => {
   try {
-    console.log(req.userData)
+    console.log(req.userData);
     let newPassword = req.body.newPassword;
 
     bcrypt.genSalt(10, (err, salt) => {
@@ -316,7 +316,11 @@ exports.updatePassword = async (req, res) => {
           { new: true }
         );
 
-        const payload = { id: updatedUser._id, name: updatedUser.name, email: updatedUser.email }; //create JWT payload
+        const payload = {
+          id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+        }; //create JWT payload
         console.log(payload);
 
         // Create JWTToken
